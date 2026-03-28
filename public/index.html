@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧪 Pene Lab — War Room</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0b;--surface:#141416;--surface2:#1a1a1e;--border:#2a2a2e;--text:#e4e4e7;--text2:#a1a1aa;--green:#22c55e;--blue:#3b82f6;--purple:#a855f7;--amber:#eab308;--red:#ef4444}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;height:100vh;display:flex;flex-direction:column}
+
+/* CRT */
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.008) 2px,rgba(255,255,255,0.008) 4px);pointer-events:none;z-index:99}
+
+/* Login */
+#login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:50;flex-direction:column;gap:20px}
+#login h1{font-size:28px;font-weight:300;letter-spacing:2px}
+#login .subtitle{color:var(--text2);font-size:13px}
+#login input{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:8px;font-size:16px;width:280px;text-align:center;outline:none}
+#login input:focus{border-color:var(--green)}
+#login .agents{display:flex;gap:12px;margin-top:10px}
+#login .agent-chip{background:var(--surface2);border:1px solid var(--border);padding:6px 14px;border-radius:20px;font-size:12px;color:var(--text2)}
+
+/* App */
+#app{display:none;height:100vh;flex-direction:column}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.header h2{font-size:15px;font-weight:500;letter-spacing:1px}
+.header .status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.header .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+
+.main{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:16px;display:flex;flex-direction:column;gap:8px}
+.sidebar h3{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--text2);margin-bottom:4px}
+.user-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:13px}
+.user-item .indicator{width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+/* Messages */
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:4px}
+.msg{display:flex;gap:10px;padding:8px 12px;border-radius:8px;max-width:85%;animation:fadeIn 0.2s}
+.msg:hover{background:var(--surface)}
+.msg .avatar{font-size:20px;flex-shrink:0;width:32px;text-align:center}
+.msg .content{flex:1}
+.msg .name{font-size:12px;font-weight:600;margin-bottom:2px}
+.msg .text{font-size:14px;line-height:1.5;color:var(--text)}
+.msg .time{font-size:10px;color:var(--text2);margin-top:2px}
+.msg.system{justify-content:center;max-width:100%}
+.msg.system .text{color:var(--text2);font-size:12px;font-style:italic;text-align:center}
+.msg.agent .name{color:var(--purple)}
+.msg.human .name{color:var(--green)}
+
+/* Input */
+.input-bar{background:var(--surface);border-top:1px solid var(--border);padding:12px 20px;display:flex;gap:12px}
+.input-bar input{flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:8px;font-size:14px;outline:none}
+.input-bar input:focus{border-color:var(--blue)}
+.input-bar button{background:var(--blue);color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
+.input-bar button:hover{opacity:0.9}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1>🧪 PENE LAB</h1>
+  <div class="subtitle">War Room — Cross-Gateway Chat</div>
+  <input type="text" id="nameInput" placeholder="Tu nombre..." autofocus>
+  <div class="agents">
+    <div class="agent-chip">🦅 Hermes (.97)</div>
+    <div class="agent-chip">🤖 Jarvis (.69)</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="header">
+    <h2>🧪 PENE LAB — WAR ROOM</h2>
+    <div class="status"><div class="dot"></div>LIVE</div>
+  </div>
+  <div class="main">
+    <div class="sidebar">
+      <h3>Online</h3>
+      <div id="userList"></div>
+      <div style="margin-top:auto;border-top:1px solid var(--border);padding-top:12px">
+        <h3>Agents</h3>
+        <div class="user-item"><div class="indicator"></div>🦅 Hermes</div>
+        <div class="user-item"><div class="indicator"></div>🤖 Jarvis</div>
+      </div>
+    </div>
+    <div class="messages" id="messages"></div>
+  </div>
+  <div class="input-bar">
+    <input type="text" id="msgInput" placeholder="Escribe un mensaje...">
+    <button onclick="sendMsg()">Enviar</button>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+let myName = '';
+
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const name = e.target.value.trim();
+    if (!name) return;
+    myName = name;
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    socket.emit('join', name);
+    document.getElementById('msgInput').focus();
+  }
+});
+
+document.getElementById('msgInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMsg();
+});
+
+function sendMsg() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text) return;
+  socket.emit('chat message', { text, emoji: '👤' });
+  input.value = '';
+}
+
+socket.on('chat message', msg => {
+  const div = document.createElement('div');
+  div.className = 'msg ' + (msg.type || 'human');
+  const time = new Date(msg.timestamp).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  
+  if (msg.type === 'system') {
+    div.innerHTML = `<div class="content"><div class="text">${msg.emoji} ${msg.text}</div></div>`;
+  } else {
+    div.innerHTML = `<div class="avatar">${msg.emoji}</div><div class="content"><div class="name">${msg.user}</div><div class="text">${escapeHtml(msg.text)}</div><div class="time">${time}</div></div>`;
+  }
+  
+  const container = document.getElementById('messages');
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+});
+
+socket.on('users', users => {
+  const list = document.getElementById('userList');
+  list.innerHTML = users.map(u => `<div class="user-item"><div class="indicator"></div>${u}</div>`).join('');
+});
+
+function escapeHtml(t) {
+  const d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
